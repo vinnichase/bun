@@ -20,8 +20,12 @@ fn handleToNumber(handle: FDImpl.System) FDImpl.SystemAsInt {
         return handle;
     }
 }
+
 fn numberToHandle(handle: FDImpl.SystemAsInt) FDImpl.System {
     if (env.os == .windows) {
+        if (!@inComptime()) {
+            std.debug.assert(handle != FDImpl.invalid_value);
+        }
         return @ptrFromInt(handle);
     } else {
         return handle;
@@ -36,7 +40,7 @@ pub fn uv_get_osfhandle(in: c_int) libuv.uv_os_fd_t {
 
 pub fn uv_open_osfhandle(in: libuv.uv_os_fd_t) c_int {
     const out = libuv.uv_open_osfhandle(in);
-    log("uv_get_osfhandle({d}) = {d}", .{ @intFromPtr(in), out });
+    log("uv_open_osfhandle({d}) = {d}", .{ @intFromPtr(in), out });
     return out;
 }
 
@@ -122,7 +126,17 @@ pub const FDImpl = packed struct {
     }
 
     pub fn isValid(this: FDImpl) bool {
-        return this.value.as_system != invalid_value;
+        return switch (env.os) {
+            // the 'zero' value on posix is debatable. it can be standard in.
+            // TODO(@paperdave): steamroll away every use of bun.FileDescriptor.zero
+            else => this.value.as_system != invalid_value,
+            .windows => switch (this.kind) {
+                // zero is not allowed in addition to the invalid value (zero would be a null ptr)
+                .system => this.value.as_system != invalid_value and this.value.as_system != 0,
+                // the libuv tag is always fine
+                .uv => true,
+            },
+        };
     }
 
     /// When calling this function, you may not be able to close the returned fd.
@@ -322,5 +336,9 @@ pub const FDImpl = packed struct {
                 }
             },
         }
+    }
+
+    pub fn assertValid(this: FDImpl) void {
+        std.debug.assert(this.isValid());
     }
 };
