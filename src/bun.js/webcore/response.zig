@@ -615,6 +615,14 @@ pub const Response = struct {
 const null_fd = bun.invalid_fd;
 
 pub const Fetch = struct {
+    const logF = Output.scoped(.Fetch, false);
+
+    fn finish(ctx: *anyopaque, bytes: []const u8, err: ?JSC.JSValue, is_async: bool) void {
+        _ = ctx;
+        _ = err;
+        logF("FINISH {} {}", .{ bytes, is_async });
+    }
+
     const headers_string = "headers";
     const method_string = "method";
 
@@ -1989,6 +1997,47 @@ pub const Fetch = struct {
                             method = Method.which(slice_.slice()) orelse .GET;
                         }
 
+                        // var reader = bun.default_allocator.create(JSC.WebCore.ByteStream.Source) catch unreachable;
+                        // reader.* = .{
+                        //     .context = undefined,
+                        //     .globalThis = globalThis,
+                        // };
+
+                        // reader.context.setup();
+
+                        // const obj = options.get(ctx.ptr(), "body").?;
+                        // _ = obj;
+                        // // reader.context.setValue(obj);
+                        // var bufferer = JSC.WebCore.BodyValueBufferer{};
+
+                        // bufferer.init(
+                        //     ctx.ptr(),
+                        //     finish,
+                        //     globalThis,
+                        //     bun.default_allocator,
+                        // );
+
+                        // const read = reader.call(ctx.ptr(), &[_]JSC.JSValue{});
+
+                        // const pipeTo = obj.getFunction(ctx.ptr(), "pipeTo") catch null;
+
+                        // const reader = pipeTo.?.call(ctx.ptr(), &[_]JSC.JSValue{});
+
+                        // const className1 = reader.className(ctx.ptr());
+                        // const className2 = pipeTo.?.className(ctx.ptr());
+
+                        // logF("CLASSNAME {} {}", .{ className1, className2 });
+                        // const isCallable = read.?.isCallable(ctx.ptr().vm());
+
+                        // logF("IS CALLABLE {}", .{isCallable});
+
+                        // const result = read.?.call(ctx.ptr(), &[0]JSC.JSValue{}).asAnyPromise();
+
+                        // ctx.ptr().bunVM().waitForPromise(result.?);
+                        // const value = result.?.result(ctx.ptr().vm());
+
+                        // logF("VALUE {}", .{value.toString(ctx.ptr()).getZigString(ctx.ptr())});
+
                         if (options.fastGet(ctx.ptr(), .body)) |body__| {
                             if (Body.Value.fromJS(ctx.ptr(), body__)) |body_const| {
                                 var body_value = body_const;
@@ -2213,9 +2262,11 @@ pub const Fetch = struct {
             ) catch unreachable;
         }
 
+        logF("SKANG BEFORE FETCH TASKLET", .{});
         var http_body = FetchTasklet.HTTPRequestBody{
             .AnyBlob = body,
         };
+        logF("SKANG BODY {}", .{http_body});
 
         if (body.needsToReadFile()) {
             prepare_body: {

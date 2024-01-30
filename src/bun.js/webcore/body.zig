@@ -398,6 +398,7 @@ pub const Body = struct {
                     return value;
                 },
                 .Locked => {
+                    log("LOCKED CASE", .{});
                     var locked = &this.Locked;
                     if (locked.readable) |readable| {
                         return readable.value;
@@ -470,6 +471,7 @@ pub const Body = struct {
 
             if (js_type.isStringLike()) {
                 var str = value.toBunString(globalThis);
+                log("STRING LIKE {}", .{str});
                 if (str.length() == 0) {
                     return Body.Value{
                         .Empty = {},
@@ -544,7 +546,14 @@ pub const Body = struct {
                 }
 
                 switch (readable.ptr) {
+                    .Direct => {
+                        log("DOT DIRECT CASE {}", .{@TypeOf(readable)});
+                    },
+                    .JavaScript => {
+                        log("DOT JAVASCRIPT CASE {}", .{@TypeOf(readable)});
+                    },
                     .Blob => |blob| {
+                        log("DOT BLOB CASE", .{});
                         readable.forceDetach(globalThis);
 
                         const result: Value = .{
@@ -559,9 +568,12 @@ pub const Body = struct {
 
                         return result;
                     },
-                    else => {},
+                    else => {
+                        log("ELSE CASE", .{});
+                    },
                 }
 
+                log("BEFORE RETURN", .{});
                 return Body.Value.fromReadableStreamWithoutLockCheck(readable, globalThis);
             }
 
