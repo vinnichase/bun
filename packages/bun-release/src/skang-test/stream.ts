@@ -1,4 +1,4 @@
-var wait = async (ms) => new Promise((r) => setTimeout(r, ms));
+var wait = async (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -32,8 +32,8 @@ const stream = new ReadableStream({
 stream.pipeTo(
   new WritableStream({
     async start() {
-      this.now = performance.now();
-      console.log(this.now);
+      // this.now = performance.now();
+      // console.log(this.now);
       return;
     },
     async write(value) {
@@ -43,7 +43,7 @@ stream.pipeTo(
       console.log("Stream closed");
     },
     async abort(reason) {
-      const now = ((performance.now() - this.now) / 1000) / 60;
+      // const now = ((performance.now() - this.now) / 1000) / 60;
       console.log({ reason });
     },
   }),
