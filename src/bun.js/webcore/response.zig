@@ -2019,9 +2019,9 @@ pub const Fetch = struct {
 
                         // const read = reader.call(ctx.ptr(), &[_]JSC.JSValue{});
 
-                        // const pipeTo = obj.getFunction(ctx.ptr(), "pipeTo") catch null;
+                        // const getReader = obj.getFunction(ctx.ptr(), "getReader") catch null;
 
-                        // const reader = pipeTo.?.call(ctx.ptr(), &[_]JSC.JSValue{});
+                        // const reader = getReader.?.call(ctx.ptr(), &[_]JSC.JSValue{});
 
                         // const className1 = reader.className(ctx.ptr());
                         // const className2 = pipeTo.?.className(ctx.ptr());

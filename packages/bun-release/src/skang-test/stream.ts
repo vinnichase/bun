@@ -3,12 +3,11 @@ var wait = async (ms: number) => new Promise((r) => setTimeout(r, ms));
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 const stream = new ReadableStream({
-  type: 'direct',
-  async pull(controller) {
+  async start(controller) {
     let i = 0;
     while (i++ < 10) {
       const data = encoder.encode(i.toString() + '\n');
-      controller.write(data);
+      controller.enqueue(data);
       await wait(1000);
     }
     controller.close();

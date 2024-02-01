@@ -6,17 +6,15 @@ async function run() {
   var abortable = new AbortController();
   var { signal } = abortable;
   var writer = writable.getWriter();
-  var settings = { url: "https://comfortable-deer-52.deno.dev", method: "post" };
   fetch("https://comfortable-deer-52.deno.dev", {
-    method: settings.method,
+    method: "post",
     // Bun does not implement TextEncoderStream, TextDecoderStream
     body: new ReadableStream({
-      type: "direct",
-      async pull(controller) {
+      async start(controller) {
         let i = 0;
         while (i++ < 10) {
           const data = encoder.encode(i.toString() + "\n");
-          controller.write(data);
+          controller.enqueue(data);
           await wait(1000);
         }
         controller.close();
